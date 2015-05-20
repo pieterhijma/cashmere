@@ -1,0 +1,13 @@
+<project
+    name="cashmere applications"
+    default="build"
+    basedir=".">
+
+    <description>
+	Cashmere applications build.
+    </description>
+
+    <property name="build-apps-dir" location=".."/>
+    <import file="../build-apps.xml"/>
+
+</project>

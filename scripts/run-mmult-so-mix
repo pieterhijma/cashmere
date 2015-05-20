@@ -1,0 +1,28 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+RUN_SCRIPT=$CASHMERE/scripts/run-fat
+
+O=optimized
+case "X$1" in
+    X)
+	;;
+    *)
+	O="$1"
+	;;
+esac
+
+DEST=mmult_so_result.$O
+
+mkdir -p $DEST
+
+RUN="MmultSO 3 1 2048"
+
+( cd ../apps/cashmere/mmult_so
+  MCL_FILES=matrixmultiplication_cc_2_0.cl,matrixmultiplication_hd7970.cl,matrixmultiplication_xeon_phi.cl ant $O
+)
+
+$RUN_SCRIPT hd7970=1 gtx480=10 k20=8 c2050=2 titan=1 gtx680=1 $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/mix.out 2>&1
+mv gantt.data $DEST/gantt-mix.data
+mv gantt-thread.data $DEST/gantt-thread-mix.data

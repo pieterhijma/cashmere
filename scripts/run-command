@@ -1,0 +1,9 @@
+#! /bin/bash
+RESERVATION=$1
+shift
+NODELIST=`preserve -llist | grep $RESERVATION | sed 's/.*\tnode/node/'`
+for node in $NODELIST
+do
+    echo $node
+    ssh $node "$@"
+done

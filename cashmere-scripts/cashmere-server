@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# This script is a convenience script to start the Cashmere registry server from the
+# Cashmere installation, specified in the $CASHMERE environment variable.
+
+# Check CASHMERE.
+if [ -z "$CASHMERE" ];  then
+    echo "please set CASHMERE to the location of your Cashmere installation" 1>&2
+    exit 1
+fi
+
+exec "$CASHMERE"/cashmere-scripts/cashmere-run -Dibis.registry.central.server.connect.timeout=300 -Xmx256M ibis.ipl.server.Server "$@"

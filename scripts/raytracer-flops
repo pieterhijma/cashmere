@@ -1,0 +1,10 @@
+Raytracer flops:
+
+Voor 8192x4096:
+nrFLO: 105730481254 for 1 samples
+
+4096x1920
+nrFLO: 24842662161 for 1 samples
+
+16384x8192
+nrFLO: 422931027959 for 1 samples

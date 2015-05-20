@@ -1,0 +1,20 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+. $CASHMERE/scripts/run-cashmere-app-das4
+
+. $CASHMERE/scripts/run-cashmere-app-single-node
+
+
+# first param
+#   the depth that is being spawned
+# second param
+#   the depth that is recursively done on a node
+# third param
+#   n of the matrix to be computed in a non-recursive manner
+
+./run-on-nodes $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar MmultSO 2 1 4096
+#runCashmereAppDas4 $NODES $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar MmultSO 3 1 2048
+# runCashmereAppDas4 $NODES $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar MmultSO 3 1 1024
+

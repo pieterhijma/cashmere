@@ -1,0 +1,5 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+cashmere-server --events --port $CASHMERE_PORT

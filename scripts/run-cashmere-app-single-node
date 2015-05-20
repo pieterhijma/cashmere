@@ -1,0 +1,27 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+usage() {
+    echo "runCashmereAppSingleNode <jar> <class> [args]"
+}
+
+runCashmereAppSingleNode() {
+    if [ $# -ge 2 ]
+    then
+	jar=$1
+	shift
+	class="$1"
+	shift
+	args=$*
+
+	CLASSPATH="$jar:$CASHMERE/jocl/*" cashmere-run -Dcashmere.closed \
+	    -Dibis.server.address=fs0.das4.cs.vu.nl -Dibis.pool.size=1 \
+	    -Dibis.server.port=$CASHMERE_PORT -Dibis.pool.name=das4 \
+	    -Dcashmere.detailedStats \
+	    $class $args
+	    #-Djava.library.path=$CASHMERE/jocl \
+    else
+	usage
+    fi
+}

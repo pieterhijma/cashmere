@@ -1,0 +1,85 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+RUN_SCRIPT=$CASHMERE/scripts/run-on-nodes
+
+O=optimized
+case "X$1" in
+    X)
+	;;
+    *)
+	O="$1"
+	;;
+esac
+
+# RUN="MmultSO 3 1 2048"
+RUN="MmultSO 2 1 4096"
+
+DEST=mmult_so_2_1_4096_result.$O
+
+mkdir -p $DEST
+
+
+( cd ../apps/cashmere/mmult_so
+  MCL_FILES=matrixmultiplication_cc_2_0.cl ant $O
+)
+
+
+for i in 1 2 4 8 16
+do
+    $RUN_SCRIPT gtx480=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/gtx480-$i.out 2>&1
+    mv gantt.data $DEST/gantt-gtx480-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-gtx480-$i.data
+done
+
+for i in 1
+do
+    $RUN_SCRIPT k20=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/k20-$i.out 2>&1
+    mv gantt.data $DEST/gantt-k20-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-k20-$i.data
+done
+
+for i in 1
+do
+    $RUN_SCRIPT c2050=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/c2050-$i.out 2>&1
+    mv gantt.data $DEST/gantt-c2050-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-c2050-$i.data
+done
+
+for i in 1
+do
+    $RUN_SCRIPT gtx680=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/gtx680-$i.out 2>&1
+    mv gantt.data $DEST/gantt-gtx680-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-gtx680-$i.data
+done
+
+for i in 1
+do
+    $RUN_SCRIPT titan=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/titan-$i.out 2>&1
+    mv gantt.data $DEST/gantt-titan-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-titan-$i.data
+done
+
+( cd ../apps/cashmere/mmult_so
+  MCL_FILES=matrixmultiplication_hd7970.cl ant $O
+)
+
+for i in 1
+do
+    $RUN_SCRIPT hd7970=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/hd7970-$i.out 2>&1
+    mv gantt.data $DEST/gantt-hd7970-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-hd7970-$i.data
+done
+
+( cd ../apps/cashmere/mmult_so
+  MCL_FILES=matrixmultiplication_xeon_phi.cl ant $O
+)
+
+for i in 1
+do
+    $RUN_SCRIPT xeon_phi=$i $CASHMERE_APP_DIR/mmult_so lib/mmult_so.jar $RUN > $DEST/xeon_phi-$i.out 2>&1
+    mv gantt.data $DEST/gantt-xeon_phi-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-xeon_phi-$i.data
+done
+

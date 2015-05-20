@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+. $CASHMERE/scripts/run-cashmere-app-das4
+
+. $CASHMERE/scripts/run-cashmere-app-single-node
+
+
+INPUT_FILE=$CASHMERE_APP_DIR/raytracer2/scenes/cornell.scn
+
+$CASHMERE/scripts/run-on-nodes 1 $CASHMERE_APP_DIR/raytracer2 lib/raytracer2.jar Raytracer \
+    4096 2048 $INPUT_FILE $gpu_cpu $*

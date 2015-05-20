@@ -1,0 +1,35 @@
+*** raytracer_cc_2_0_generated_by_mcl.mcl	2015-05-20 15:12:42.304606478 +0200
+--- raytracer_cc_2_0.cl	2015-05-20 10:56:22.580796042 +0200
+***************
+*** 217,231 ****
+   float getRandom ( uint* seed0,  uint* seed1) {
+  
+  
+!     
+! 
+! 
+!     *seed0 = 36969 * ((*seed0 & 65535) + *seed0 >> 16);
+!     *seed1 = 18000 * ((*seed1 & 65535) + *seed1 >> 16);
+!     const int ires = (*seed0 << 16) + *seed1;
+!     const float fres = (float) ((*seed0 << 16) + *seed1 & 8388607 | 
+!             1073741824);
+!     return (fres - 2.0) / 2.0;
+  }
+  
+  
+--- 217,231 ----
+   float getRandom ( uint* seed0,  uint* seed1) {
+  
+  
+!     *seed0 = 36969 * (*seed0 & 65535) + (*seed0 >> 16);
+!     *seed1 = 18000 * (*seed1 & 65535) + (*seed1 >> 16);
+!     const uint ires = (*seed0 << 16) + *seed1;
+!     union {
+! 	float f;
+! 	uint ui;
+!     } res;
+!     res.ui = (ires & 0x007fffff) | 0x40000000;
+!     return (res.f - 2.0f) / 2.0f;
+  }
+  
+  

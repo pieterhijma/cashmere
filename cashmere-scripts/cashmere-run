@@ -1,0 +1,22 @@
+#!/bin/sh
+
+#cashmere-run script.
+#This script is a convenience script to run Cashmere applications.
+
+# Check setting of CASHMERE
+if [ -z "$CASHMERE" ];  then
+    echo "please set CASHMERE to the location of your CASHMERE installation" 1>&2
+    exit 1
+fi
+
+trap "rm -f /tmp/libJOCL_0_1_9-linux-x86_64.so" EXIT ERR 1 2 3 15
+
+# Run..
+# Note: this requires Java 6.
+java \
+    -classpath "$CLASSPATH:$CASHMERE/lib/"'*' \
+    -Dgat.adaptor.path="$CASHMERE"/lib/adaptors \
+    -Dlog4j.configuration=file:"$CASHMERE"/log4j.properties \
+    -Dibis.io.buffer.size=65536 \
+    -Dibis.io.conversion.buffer.size=65536 \
+    "$@"

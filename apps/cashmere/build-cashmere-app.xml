@@ -1,0 +1,152 @@
+<project
+    name="cashmere-app"
+    default="jar"
+    basedir=".">
+
+    <description>
+	Ibis Cashmere application build
+    </description>
+
+    <!--
+        Requires definition of 'cashmere-classes': a comma-separated list of class
+	    names that must be rewritten.
+	Optional definition of 'cashmerec-flags': extra options to be supplied
+	    to Ibisc.
+	Optional definition of 'user-classpath' : extra classpath elements.
+    -->
+
+    <property environment="env"/>
+    <property name="cashmere"       location="${env.CASHMERE}"/>
+    <property name="myclasspath" value="${env.CLASSPATH}"/>
+
+    <property name="tmp"         value="tmp"/>
+    <property name="lib"         value="lib"/>
+
+    <basename file="." property="application-name" />
+
+    <target name="set-classpath" unless="classpath.initialized">
+	<path id="default.classpath">
+	    <pathelement path="${tmp}"/>
+	    <pathelement path="${user-classpath}"/>
+	    <pathelement path="${myclasspath}"/>
+	    <fileset dir="${cashmere}/lib">
+		<include name="*.jar"/>
+	    </fileset>
+	</path>
+	<echo	message="Now set default.classpath to ${default.classpath}"
+		level="verbose"/>
+	<property name="classpath.initialized" value="true"/>
+    </target>
+
+    <target name="init" depends="set-classpath,load-contrib">
+        <tstamp />
+        <mkdir dir="${tmp}" />
+        <mkdir dir="${lib}" />
+    </target>
+
+    <target name="load-contrib" unless="contrib-loaded">
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+	    <classpath>
+		<pathelement location="${cashmere}/apps/external/ant-contrib-1.0b3.jar"/>
+	    </classpath>
+	</taskdef>
+	<property name="contrib-loaded" value="true"/>
+	<echo message="Contrib loaded"/>
+    </target>
+
+    <target name="compile" depends="init"
+	    description="Compile application without any bytecode rewriting">
+	<javac destdir="${tmp}" debug="true" srcdir="." source="1.5"
+		target="1.5">
+	    <classpath refid="default.classpath" />
+	    <!--
+	    <compilerarg value="-Xlint:unchecked"/>
+	    -->
+            <include name="*.java" />
+        </javac>
+    </target>
+
+    <target name="compile-mcl" depends="init"
+	description="Compile mcl-kernel" if="mcl-files">
+
+	<!--
+	<loadresource property="mcl-binary">
+	    <propertyresource name="mcl-file"/>
+	    <filterchain>
+		<tokenfilter>
+		    <filetokenizer/>
+		    <replacestring from=".cl" to=".clbin"/>
+		</tokenfilter>
+	    </filterchain>
+	</loadresource>
+
+	<exec executable="oclc">
+	    <arg value="${mcl-file}"/>
+	</exec>
+
+	<copy file="${mcl-binary}" todir="${tmp}"/>
+	-->
+	<for list="${mcl-files}" param="mcl-file">
+	    <sequential>
+		<echo message="@{mcl-file}"/>
+		<copy file="@{mcl-file}" todir="${tmp}"/>
+	    </sequential>
+	</for>
+    </target>
+
+    <target name="cashmere-internal">
+	<java	classname="ibis.compile.Ibisc"
+		taskname="Ibisc"
+		dir="${tmp}"
+		failonerror="true"
+		maxmemory="512M"
+		fork="true">
+		<arg line="${cashmerec-flags} -cashmere &quot;${cashmere-classes}&quot; ."/>
+		<classpath refid="default.classpath"/>
+	</java>
+    </target>
+
+    <target name="cashmere-adviser">
+	<java	classname="ibis.cashmere.impl.syncrewriter.SyncAdviser"
+		taskname="SyncAdviser"
+		dir="${tmp}"
+		failonerror="true"
+		maxmemory="512M"
+		fork="true">
+		<arg line="${cashmere-classes}"/>
+		<classpath refid="default.classpath"/>
+	</java>
+    </target>
+
+    <target name="set-cashmerec-flags-notset" unless="cashmerec-flags">
+	<property name="cashmerec-flags" value=""/>
+    </target>
+
+    <target name="build"
+	description="Compile Cashmere application for parallel execution"
+	depends="compile,compile-mcl,set-cashmerec-flags-notset,cashmere-adviser,cashmere-internal"/>
+
+    <target name="jar" depends="build" description="Build a Jar file for an application">
+	<jar destfile="${lib}/${application-name}.jar" basedir="${tmp}"
+	    includes="**/*.class **/*.cl"/>
+	<delete dir="${tmp}" />
+    </target>
+
+    <target name="clean" description="Clean up the build">
+        <delete dir="${tmp}" />
+        <delete dir="${lib}" />
+    </target>
+
+    <target name="copy-optimized">
+	<copy overwrite="true" todir=".">
+	    <fileset dir="optimized"/>
+        </copy>
+    </target>
+
+    <target name="copy-unoptimized">
+	<copy overwrite="true" todir=".">
+	    <fileset dir="unoptimized"/>
+        </copy>
+    </target>
+
+</project>

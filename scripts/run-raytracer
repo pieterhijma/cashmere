@@ -1,0 +1,98 @@
+#!/bin/bash
+
+. $CASHMERE/scripts/config.bash
+
+RUN_SCRIPT=$CASHMERE/scripts/run-on-nodes
+
+O=optimized
+case "X$1" in
+    X)
+	;;
+    *)
+	O="$1"
+	;;
+esac
+
+DEST=raytracer_result.$O
+case $O in
+optimized)
+    DIR=raytracer2_optimized
+    ;;
+*)
+    DIR=raytracer2
+    ;;
+esac
+
+INPUT_FILE=$CASHMERE_APP_DIR/raytracer2/scenes/cornell.scn
+
+mkdir -p $DEST
+
+RUN="Raytracer 8192 4096 $INPUT_FILE 500 gpu"
+
+( cd ../apps/cashmere/$DIR
+  MCL_FILES=raytracer_xeon_phi.cl ant
+)
+
+for i in 1
+do
+    $RUN_SCRIPT xeon_phi=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN > $DEST/xeon_phi-$i.out 2>&1
+    mv gantt.data $DEST/gantt-xeon_phi-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-xeon_phi-$i.data
+    sleep 10
+done
+
+( cd ../apps/cashmere/$DIR
+  MCL_FILES=raytracer_hd7970.cl ant
+)
+
+for i in 1
+do
+    $RUN_SCRIPT hd7970=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN > $DEST/hd7970-$i.out 2>&1
+    mv gantt.data $DEST/gantt-hd7970-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-hd7970-$i.data
+    sleep 10
+done
+
+( cd ../apps/cashmere/$DIR
+  MCL_FILES=raytracer_cc_2_0.cl ant
+)
+
+for i in 1 2 4 8 16
+do
+    $RUN_SCRIPT gtx480=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN > $DEST/gtx480-$i.out 2>&1
+    mv gantt.data $DEST/gantt-gtx480-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-gtx480-$i.data
+    sleep 10
+done
+
+for i in 1
+do
+    $RUN_SCRIPT k20=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN > $DEST/k20-$i.out 2>&1
+    mv gantt.data $DEST/gantt-k20-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-k20-$i.data
+    sleep 10
+done
+
+for i in 1
+do
+    $RUN_SCRIPT c2050=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN > $DEST/c2050-$i.out 2>&1
+    mv gantt.data $DEST/gantt-c2050-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-c2050-$i.data
+    sleep 10
+done
+
+for i in 1
+do
+    $RUN_SCRIPT gtx680=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN > $DEST/gtx680-$i.out 2>&1
+    mv gantt.data $DEST/gantt-gtx680-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-gtx680-$i.data
+    sleep 10
+done
+
+for i in 1
+do
+    $RUN_SCRIPT titan=$i $CASHMERE_APP_DIR/$DIR lib/$DIR.jar $RUN  > $DEST/titan-$i.out 2>&1
+    mv gantt.data $DEST/gantt-titan-$i.data
+    mv gantt-thread.data $DEST/gantt-thread-titan-$i.data
+    sleep 10
+done

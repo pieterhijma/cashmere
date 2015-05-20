@@ -1,0 +1,356 @@
+\documentclass[a4paper,10pt]{article}
+
+%\usepackage{graphicx}
+\usepackage{url}
+\usepackage{times}
+
+\begin{document}
+
+\title{Cashmere System User's Guide}
+
+\maketitle
+
+\section{Introduction}
+
+This manual describes the steps required to run an application that
+uses the Cashmere System. How to create such an application
+is described in the Cashmere Programmer's Manual (which does not exist yet,
+so you'll have to look at the supplied examples).
+Here, we will discuss how to compile and run the "Kmeans" example.
+
+Since Cashmere is built on top of the Ibis Portability Layer (IPL),
+the Cashmere release contains the Ibis communication library, which contains
+implementations of the IPL. Parts of this manual may look familiar for
+readers that are familiar with the Ibis communication library.
+
+\section{Compiling the Kmeans example}
+
+The Kmeans example application for the Cashmere System is
+provided with the Cashmere distribution, in the \texttt{apps/cashmere} directory.
+
+If you change the example, you will need to recompile it. This
+requires the build system \texttt{ant}\footnote{\url{http://ant.apache.org}}.
+Running \texttt{ant} in the \texttt{apps/cashmere/kmeans} directory compiles
+the example, and rewrites the class files for use with Cashmere.
+
+Invoking \emph{ant clean compile} compiles a sequential version
+of the application,
+leaving the class files in a directory called \texttt{tmp}.
+
+If, for some reason, it is not convenient to use \emph{ant} to compile
+your application, or you have only class files or jar files available
+for parts of your application, it is also possible to first compile
+your application to class files or jar files, and then process those
+using the \emph{cashmerec} script. This script can be found in the Cashmere
+cashmere-scripts directory. It takes either directories, class files, or jar
+files as parameter, and processes those, possibly rewriting them for Ibis.
+In case of a directory, all class files and jar files in that directory or
+its subdirectories are processed. The command sequence
+
+\begin{verbatim}
+$ cd $CASHMERE/apps/cashmere/kmeans
+$ mkdir tmp
+$ cp optimized/* .
+$ javac -d tmp -g \
+     -classpath $CASHMERE/lib/'*'\
+     *.java
+$ CLASSPATH=tmp \
+    $CASHMERE/cashmere-scripts/cashmerec \
+    -cashmere "KMeans,Points" tmp
+$ mkdir lib
+$ ( cd tmp ; jar c . ) > lib/kmeans.jar
+$ rm -rf tmp
+\end{verbatim}
+
+creates a \texttt{lib} directory and stores the resulting class files there,
+in a jar-file called \texttt{kmeansjar}.
+The \texttt{CASHMERE} environment variable must be set to the location of
+the Cashmere installation.
+
+Note that the Cashmere bytecode rewriter \texttt{cashmerec} needs to know the
+classes in your application that must be rewritten for Cashmere.
+Those classes are: the main class, any class that implements a shared object,
+and all classes that invoke spawns or syncs.
+When using the \texttt{cashmerec} script, these classes must be provided as
+a comma-separated list, with the \texttt{-cashmere} option. In
+\texttt{build.xml} they are provided as the \texttt{cashmere-classes} property.
+
+\section{A Cashmere run}
+
+Before discussing
+the running of a Cashmere application, we will discuss services that are
+needed by the Ibis communication library.
+
+\subsection{The pool}
+
+A central concept in Ibis is the \emph{Pool}. A pool consists of one or
+more Ibis instances, usually running on different machines. Each pool is
+generally made up of Ibises running a single distributed application.
+Ibises in a pool can communicate with each other, and, using the
+registry mechanism present in Ibis, can search for other Ibises in the
+same pool, get notified of Ibises joining the pool, etc. To
+coordinate Ibis pools a so-called \emph{Ibis server} is used.
+
+\subsection{The Ibis Server}
+
+The Ibis server is the Swiss-army-knife server of the Ibis project.
+Services can be dynamically added to the server. By default, the Ibis
+communication library comes with a registry service. This registry
+service manages pools, possibly multiple pools at the same time.
+
+In addition to the registry service, the server also allows
+Ibises to route traffic over the server if no direct connection is
+possible between two instances due to firewalls or NAT boxes. This is
+done using the Smartsockets library of the Ibis project.
+
+The Ibis server is started with the \texttt{cashmere-server} script which is
+located in the \texttt{cashmere-scripts} directory of the Cashmere distribution.
+Before starting a Cashmere application, an Ibis server needs to be running on a
+machine that is accessible from all nodes participating in the Cashmere run.
+The server listens to a TCP port. The port number can be specified using
+the \texttt{--port} command line option to the \texttt{cashmere-server}
+script.  For a complete list of all options, use the \texttt{--help}
+option of the script. One useful option is the  \texttt{--events}
+option, which makes the registry print out events (such as Cashmere instances
+joining a pool).
+
+\subsubsection{Hubs}
+\label{hubs}
+
+The Ibis server is a single point which needs to be reachable from every
+Ibis instance. Since sometimes this is not possible due to firewalls,
+additional \emph{hubs} can be started to route traffic, creating a
+routing infrastructure for the Cashmere instances. These hubs can be started
+by using cashmere-server script with the \texttt{--hub-only} option. In
+addition, each hub needs to know the location of as many of the other
+hubs as possible. This information can be provided by using the
+\texttt{--hub-addresses} option. See the \texttt{--help} option of the
+cashmere-server script for more information.
+
+\subsection{Running the example: preliminaries}
+
+When the Ibis server is running, the Cashmere application itself can be
+started.  There are a number of requirements that need to be met before
+Ibis (and thus Cashmere) can be started correctly.
+In this section we will discuss these in detail.
+
+Several of the steps below require the usage of \emph{system properties}.
+System properties can be set in Java using the \texttt{-D} option of the
+\texttt{java} command. Be sure to use appropriate quoting for your
+command interpreter.
+
+As an alternative to using system properties, it is also possible to use
+a java properties file
+\footnote{\url{http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html}}.
+A properties file is a file containing one property per line, usually of
+the format \texttt{property = value}. Properties of Ibis can be set in
+such a file as if they were set on the command line directly.
+
+Ibis and Cashmere will look for a file named \texttt{ibis.properties} in the
+current working directory, on the class path, and at a location specified
+with the \texttt{ibis.properties.file} system property.
+
+\subsubsection{Add jar files to the classpath}
+
+The Cashmere implementation is provided in a single jar file: cashmere.jar,
+appended with the version of Cashmere, for instance \texttt{cashmere-0.1.jar}.
+Cashmere interfaces to Ibis using the Ibis Portability Layer, or
+\emph{IPL}. Both Cashmere and the IPL depend on various other libraries.
+All jar files in \$CASHMERE/lib need to be on the classpath.
+
+\subsubsection{Configure Log4j}
+
+Ibis and Cashmere use the Log4J library of the Apache project to print debugging
+information, warnings, and error messages. This library must be
+initialized. A configuration file can be specified using the
+\texttt{log4j.configuration} system property. For example, to use a file
+named \texttt{log4j.properties} in the current directory, use the
+following command line option:
+\texttt{-Dlog4j.configuration=file:log4j.properties}. For more info,
+see the log4j website \footnote{\url{http://logging.apache.org/log4j}}.
+
+\subsubsection{Set the location of the server and hubs}
+
+To communicate with the registry service, each Ibis instance needs the address
+of the Ibis server. This address must be specified by using the
+\texttt{ibis.server.address} system property. The full address needed is
+printed on start up of the Ibis server.
+
+For convenience, it is also possible to only provide an address, port number
+pair, e.g. \texttt{machine.domain.com:5435} or even simply a host, e.g.
+\texttt{localhost}. In this case, the default port number (8888) is implied.
+The port number provided must match the one given to the Ibis server
+with the \texttt{--port} option.
+
+When additional hubs are started (see Section \ref{hubs}), their locations
+must be provided to the Ibis instances. This can be done using
+the \texttt{ibis.hub.addresses} property. Ibis expects a comma-separated
+list of addresses of hubs. Ibis will use the first reachable hub on the
+list. The address of the Ibis server is appended to this list
+automatically. Thus, by default, the Ibis server itself is used as the
+hub.
+
+\subsubsection{Set the name and size of the pool}
+
+Each Ibis instance belongs to a pool. The name of this pool must be provided
+using the \texttt{ibis.pool.name} property. With the help of the Ibis server,
+this name is then used to locate other Ibis instances which belong to the
+same pool. Since the Ibis server can service multiple pools simultaneously,
+each pool must have a unique name.
+
+It is possible for pools to have a fixed size. In these so-called \emph{closed
+world} pools, the number of Ibises in the pool is also needed to function
+correctly. This size must be set using the \texttt{ibis.pool.size} property.
+When this property is needed, but not provided, Ibis will print an error. 
+
+\subsubsection{Cashmere system properties}
+
+Cashmere recognizes the following system properties, which can either
+be provided on the command line, or in a \texttt{ibis.properties} file
+as discussed above:
+\begin{description}
+\item{\texttt{cashmere.closed}}
+Only use the initial set of hosts for the computation; do not allow
+further hosts to join the computation later on. This requires the
+\texttt{ibis.pool.size} property as well, as discussed above.
+\item{\texttt{cashmere.stats}}
+Display some statistics at the end of the Cashmere run. This is the default.
+\item{\texttt{cashmere.stats=false}}
+Don't display statistics.
+\item{\texttt{cashmere.detailedStats}}
+Display detailed statistics for every member at the end of the Cashmere run.
+\item{\texttt{cashmere.alg}=\emph{algorithm}}
+Specify the load-balancing algorithm to use. The possible values for
+\emph{algorithm} are: RS for random work-stealing, CRS for cluster-aware
+random-work stealing, and MW for master-worker.
+\item{\texttt{cashmere.ft.naive}}
+Fault tolerance in Cashmere is implemented by recomputing jobs lost as a
+result of processor crashes.
+To improve the performance of the
+algorithm, a Global Result Table (GRT) may be used, in which results of
+so-called "orphan" jobs are stored, which otherwise would have to be discarded.
+The results of orphan jobs are reused while recomputing jobs lost in
+crashes. The \texttt{cashmere.ft.naive} property specifies that Cashmere is
+to use the naive version of its fault tolerance implementation, without
+a GRT. This means that sub-jobs of lost jobs will all be recomputed.
+The default is that a GRT is used.
+\end{description}
+
+\subsubsection{The cashmere-run script}
+
+To simplify running a Cashmere application, a \texttt{cashmere-run} script is
+provided with the distribution. This script can be
+used as follows
+
+\begin{center}
+\texttt{cashmere-run} \emph{java-flags class parameters}
+\end{center}
+
+The script performs the first two steps needed to run an application
+using Cashmere. It adds all required jar files
+to the class path, and configures log4j.
+It then runs \texttt{java} with any
+command line options given to it. Therefore, any additional options for
+Java, the main class and any application parameters must be provided as
+if \texttt{java} was called directly.
+
+The \texttt{cashmere-run} script needs the location of the Cashmere
+distribution. This must be provided using the CASHMERE environment
+variable.
+
+\subsection{Running the example on Unix-like systems}
+
+This section is specific for Unix-like systems. In particular, the
+commands presented are for a Bourne shell or bash.
+
+We will now run the example. All code below assumes the CASHMERE
+environment variable is set to the location of the Cashmere distribution.
+
+First, we will need an Ibis server.
+Let us assume that the machine we are going to run this server on is called
+"isrv". So, we start a shell on "isrv" and
+run the \texttt{cashmere-server} script:
+\noindent
+{\small
+\begin{verbatim}
+$ $CASHMERE/cashmere-scripts/cashmere-server --events
+\end{verbatim}
+}
+\noindent
+
+By providing the \texttt{--events} option the server
+prints information on when Ibis instances join and leave the pool.
+
+Next, we will start the application on two different machines.
+One instance will act as the
+"Cashmere master", the other one will be a "Cashmere client".
+Cashmere will determine who is who automatically.
+Therefore we can using the same
+command line for both master and client.
+Run the following command on these two machines:
+
+\noindent
+{\small
+\begin{verbatim}
+$ CLASSPATH=$CASHMERE/apps/cashmere/kmeans/lib/kmeans.jar \
+    $CASHMERE/cashmere-scripts/cashmere-run \
+    -Dcashmere.closed -Dibis.server.address=isrv \
+    -Dibis.pool.size=2 -Dibis.pool.name=test \
+    KMeans -iters 3
+\end{verbatim}
+}
+\noindent
+
+This sets the CLASSPATH environment variable to the jar file of the
+application, and calls cashmere-run. You should now have two running
+instances of your application. One of them should print:
+
+\noindent
+{\small
+\begin{verbatim}
+KMeans, running on GPU, number of tasks = 2
+Number of features: 4, number of centers: 1024, number of points: 134217728
+Iteration 1, max diff = 23.26124
+Iteration 2, max diff = 11.627274
+Iteration 3, max diff = 2.808706
+KMeans time: 11.177539494000001 seconds
+Kmeans performance: 442.655768 GFLOPS
+\end{verbatim}
+}
+\noindent
+
+or something similar, followed by some Cashmere statistics.
+
+As said, the cashmere-run script is only provided for convenience. To run
+the application without cashmere-run, the command below can be used.
+Note that this only works with Java 6 or later. For Java 1.5, you need to
+explicitly add all jar files in \$CASHMERE/lib to the classpath.
+
+\noindent
+{\small
+\begin{verbatim}
+$ java \
+    -cp \
+    $CASHMERE/lib/'*':$CASHMERE/apps/cashmere/kmeans/lib/kmeans.jar \
+    -Dibis.server.address=isrv \
+    -Dibis.pool.name=test -Dibis.pool.size=2 \
+    -Dcashmere.closed \
+    -Dlog4j.configuration=file:$CASHMERE/log4j.properties \
+    KMeans -iters 3
+\end{verbatim}
+}
+\noindent
+
+\subsection{Running the example on Windows systems}
+
+To be supplied later.
+
+\section{Further Reading}
+
+The Ibis web page \url{http://www.cs.vu.nl/ibis} lists all
+the documentation and software available for Ibis, including papers, and
+slides of presentations.
+
+For Cashmere, see the examples provided in the apps/cashmere directory.
+\end{document}
+
