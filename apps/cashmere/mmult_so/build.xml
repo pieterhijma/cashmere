@@ -1,6 +1,6 @@
 <project
     name="ibis.apps.cashmere.mmult"
-    default="optimized"
+    default="build-default"
     basedir=".">
 
     <property name="cashmerec-flags" value="-keep"/>
@@ -38,6 +38,8 @@
     <target name="optimized" depends="copy-optimized,main"/>
 
     <target name="unoptimized" depends="copy-unoptimized,main"/>
+
+    <target name="build-default" depends="optimized"/>
 
 </project>
 

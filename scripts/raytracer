@@ -9,26 +9,28 @@
 
 INPUT_FILE=$CASHMERE_APP_DIR/raytracer2/scenes/cornell.scn
 
+
 if [[ ($# -ge 1) && (($1 == "cpu") || ($1 == "gpu")) ]]
 then
 
     if [[ $1 == "cpu" ]]
     then
-	nrIbises=8
-	nrSamples=20
-    else
-	nrIbises=1
 	nrSamples=1
+    else
+	nrSamples=400
     fi
 
     gpu_cpu=$1
     shift
 
-    $CASHMERE/scripts/run-on-nodes $nrIbises \
+    $CASHMERE/scripts/run-on-nodes \
 	$CASHMERE_APP_DIR/raytracer2 lib/raytracer2.jar Raytracer \
-	4096 2048 $INPUT_FILE $nrSamples $gpu_cpu $*
+	4096 2048 $INPUT_FILE $nrSamples $gpu_cpu "$@"
+
 else
     echo "USAGE: $(basename $0) <cpu|gpu>"
     exit 1
 fi
+
+
 

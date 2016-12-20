@@ -1,6 +1,6 @@
 <project
     name="ibis.apps.cashmere.raytracer"
-    default="main"
+    default="build-default"
     basedir=".">
 
     <property name="cashmerec-flags" value=""/> 
@@ -29,5 +29,7 @@
     <import file="../build-cashmere-app.xml"/>
 
     <target name="main" depends="set.properties,jar"/>
+
+    <target name="build-default" depends="main"/>
 
 </project>

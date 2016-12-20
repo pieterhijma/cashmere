@@ -61,7 +61,7 @@
 	    depends="-list-build-files"
 	    description="Build Ibis applications">
 	<antcall target="-do-list">
-	    <param name="do-target" value="build"/>
+	    <param name="do-target" value="build-default"/>
 	</antcall>
     </target>
 

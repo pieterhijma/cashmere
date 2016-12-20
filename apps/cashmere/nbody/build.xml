@@ -1,6 +1,6 @@
 <project
     name="ibis.apps.cashmere.nbody_inline"
-    default="optimized"
+    default="build-default"
     basedir=".">
 
     <property name="cashmerec-flags" value="-keep"/>
@@ -29,7 +29,7 @@
 	<property name="mcl-files" value="nbody_xeon_phi.cl"/>
 	<property name="mcl-files" value="nbody_hd7970.cl"/>
 	-->
-	<property name="mcl-files" value="nbody_cc_2_0.cl,nbody_xeon_e5620.cl,nbody_xeon_phi.cl,nbody-hd7970.cl"/>
+	<property name="mcl-files" value="nbody_cc_2_0.cl,nbody_xeon_e5620.cl,nbody_xeon_phi.cl,nbody_hd7970.cl"/>
     </target>   
 
     <import file="../build-cashmere-app.xml"/>
@@ -39,5 +39,7 @@
     <target name="optimized" depends="copy-optimized,main"/>
 
     <target name="unoptimized" depends="copy-unoptimized,main"/>
+
+    <target name="build-default" depends="optimized"/>
 
 </project>
