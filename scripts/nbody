@@ -7,4 +7,4 @@
 . $CASHMERE/scripts/run-cashmere-app-single-node
 
 # ./run-on-nodes $CASHMERE_APP_DIR/nbody lib/nbody.jar NBody -it 3 -gpufactor 4 -min 16384 1048576 "$@"
-$CASHMERE/scripts/run-on-nodes $CASHMERE_APP_DIR/nbody lib/nbody.jar NBody -it 3 -gpufactor 4 -min 241664 966656 "$@"
+$CASHMERE/scripts/run-on-nodes.$MACH $CASHMERE_APP_DIR/nbody lib/nbody.jar NBody -it 3 -gpufactor 4 -min 241664 966656 "$@"

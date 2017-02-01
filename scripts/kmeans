@@ -2,4 +2,4 @@
 
 . $CASHMERE/scripts/config.bash
 
-$CASHMERE/scripts/run-on-nodes $CASHMERE_APP_DIR/kmeans lib/kmeans.jar KMeans -gpu -gpuJobsPerTask 4 -nPoints 268435456 -nFeatures 4 -nCenters 4096 -iters 3 -nTasks 128 "$@"
+$CASHMERE/scripts/run-on-nodes.$MACH $CASHMERE_APP_DIR/kmeans lib/kmeans.jar KMeans -gpu -gpuJobsPerTask 4 -nPoints 268435456 -nFeatures 4 -nCenters 4096 -iters 3 -nTasks 128 "$@"

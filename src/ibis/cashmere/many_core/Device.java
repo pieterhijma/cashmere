@@ -107,6 +107,21 @@ public class Device implements Comparable<Device> {
 		"Intel(R) Many Integrated Core Acceleration Card",
 		new DeviceInfo("xeon_phi", 10, "xeon_phi"));
 
+	// das5
+	OPENCL_TO_MCL_DEVICE_INFO.put(
+		"Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz", new DeviceInfo(
+			"xeon_e5620", 1, "xeon_e5620"));
+	OPENCL_TO_MCL_DEVICE_INFO.put(
+		"GeForce GTX TITAN X", new DeviceInfo(
+			"cc_2_0", 60, "titan_x"));
+	OPENCL_TO_MCL_DEVICE_INFO.put("Tesla K40c", new DeviceInfo("cc_2_0",
+		70, "k40"));
+	OPENCL_TO_MCL_DEVICE_INFO.put(
+		"TITAN X (Pascal)", new DeviceInfo(
+			"cc_2_0", 80, "titan_x_pascal"));
+
+
+	
 	ACCELERATORS = new HashSet<String>();
 	ACCELERATORS.add("cpu");
     }

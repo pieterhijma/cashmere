@@ -23,7 +23,7 @@ then
     gpu_cpu=$1
     shift
 
-    $CASHMERE/scripts/run-on-nodes \
+    $CASHMERE/scripts/run-on-nodes.$MACH \
 	$CASHMERE_APP_DIR/raytracer2 lib/raytracer2.jar Raytracer \
 	4096 2048 $INPUT_FILE $nrSamples $gpu_cpu "$@"
 

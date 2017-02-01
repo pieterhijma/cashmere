@@ -1,0 +1,15 @@
+#!/bin/bash
+
+usage() {
+    echo "USAGE: $(basename $0) <gantt_file>"
+}
+
+if [ $# != 1 ]
+then
+    usage
+    exit 1
+fi
+
+GANTT_FILE=$1
+
+sed -i '/steal/d' $GANTT_FILE
