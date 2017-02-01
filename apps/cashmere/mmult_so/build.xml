@@ -23,12 +23,12 @@
     </target>   
 
     <target name="cond.not.exist" depends="cond.check" unless="env-exists">
+	<property name="mcl-files" value="matrixmultiplication_cc_2_0.cl,matrixmultiplication_xeon_e5620.cl,matrixmultiplication_xeon_phi.cl"/>
 	<!--
 	<property name="mcl-files" value="matrixmultiplication_xeon_e5620.cl"/>
-	<property name="mcl-files" value="matrixmultiplication_cc_2_0.cl,matrixmultiplication_xeon_e5620.cl,matrixmultiplication_xeon_phi.cl"/>
 	<property name="mcl-files" value="matrixmultiplication_xeon_phi.cl"/>
 	-->
-	<property name="mcl-files" value="matrixmultiplication_cc_2_0.cl"/>
+	<!-- <property name="mcl-files" value="matrixmultiplication_cc_2_0.cl"/>-->
     </target>   
 
     <import file="../build-cashmere-app.xml"/>
