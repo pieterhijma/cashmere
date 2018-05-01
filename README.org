@@ -1,0 +1,44 @@
+#+title: Cashmere
+
+* Introduction
+
+Cashmere is a programming system for heterogeneous compute clusters with
+many-core devices such as GPUs, something we call a compute jungle.
+Heterogeneity refers to the fact that the compute cluster can contain many
+different kinds of many-core devices with different processing speeds.
+Cashmere makes it possible to achieve good scalability and performance on these
+heterogeneous compute clusters.
+
+Cashmere acts as a library on top of [[https://github.com/NLeSC/Constellation][Constellation]], a framework that schedules
+loosely coupled activities by means of work stealing.  Cashmere operates on the
+level of one node and is responsible for scheduling many-core kernels
+efficiently onto may-core devices within the node.  In addition, it provides a
+convenient interface for calling kernels.  In Cashmere, the kernels for the
+many-core devices are written in [[https://github.com/JungleComputing/mcl][Many-Core Levels]] (MCL), a programming system
+that allows one to write kernels for many-cores on multiple levels of
+abstraction.  This allows programmers to trade off (control over) performance
+and portability and maintainability of the code.
+
+Cashmere is an open source project of the Computer Systems group of the
+Computer Science department of the Faculty of Sciences at the Vrije
+Universiteit Amsterdam, The Netherlands.  Cashmere and Constellation are built
+on the Ibis Portability Layer (IPL).  Ibis has its own web-site:
+http://www.cs.vu.nl/ibis/ where you can find more Ibis documentation, papers,
+application sources.
+
+* History
+
+In version 0.1.0, Cashmere was based on [[https://github.com/JungleComputing/satin][Satin]] that extends Java with Cilk like
+primitives that make it very convenient for the programmer to write divide and
+conquer style programs.  In its current version 0.2.0, Cashmere acts as a
+library on top of [[https://github.com/NLeSC/Constellation][Constellation]].
+
+* Building Cashmere
+
+#+begin_src sh
+git clone https://github.com/JungleComputing/cashmere.git
+cd cashmere
+./gradlew build
+#+end_src
+
+

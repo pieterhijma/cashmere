@@ -1,0 +1,87 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.jfrog.bintray' version '1.8.0'
+}
+
+dependencies {
+    api 'nl.junglecomputing.cashmere:jocl:2.0.1'
+    api 'nl.junglecomputing:constellation:2.0.0'
+    api 'nl.junglecomputing.ipl:ipl-support:2.3.1'
+    implementation 'org.slf4j:slf4j-api:1.7.21'
+    implementation 'nl.junglecomputing.ipl:ibis-util:2.3.1'
+}
+
+repositories {
+    jcenter()
+
+    maven() {
+        // for sbbi-upnplib
+	url 'http://maven.nuiton.org/release'
+    }
+}
+
+version = '0.2.0'
+
+def pomConfig = {
+    scm {
+        url "https://github.com/junglecomputing/cashmere.git"
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+
+javadoc {
+  options.memberLevel = JavadocMemberLevel.PUBLIC
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+	mavenJava(MavenPublication) {
+	    from components.java
+	    artifact sourcesJar {
+		classifier "sources"
+	    }
+	    artifact javadocJar {
+		classifier "javadoc"
+	    }
+	    groupId 'nl.junglecomputing.cashmere'
+	    artifactId 'cashmere'
+	    version version
+
+	    pom.withXml {
+		def root = asNode()
+                root.appendNode('url', 'https://github.com/junglecomputing/cashmere.git')
+                root.children().last() + pomConfig
+	    }
+	}
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_NAME')
+    key = System.getenv('BINTRAY_APIKEY')
+    publications = ['mavenJava']
+    pkg {
+	repo = 'JungleComputing-Cashmere'
+	name = 'cashmere'
+	userOrg = "$user"
+	vcsUrl = 'https://github.com/JungleComputing/cashmere.git'
+	licenses = ['Apache-2.0']
+    }
+}

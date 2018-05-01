@@ -1,5 +1,0 @@
-#!/bin/bash
-
-. $CASHMERE/scripts/create_class_path.bash
-
-createClassPath $*

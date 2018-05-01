@@ -1,1 +1,7 @@
-/lib
+/prj.el
+/.gradle/
+/build
+/.classpath
+/.project
+/.settings
+/bin
